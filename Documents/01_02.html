@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<link href="css/main.css" rel="stylesheet" type="text/css">
+<title>ProjectMASM</title>
+</head>
+<body>
+<!-- 全体コンテナ　-->
+<div id="container">
+<div id="header">
+<h3>ProjectMASM</h3>
+</div>
+<!-- コンテンツ　-->
+<div id="contents">
+<h2>１．基本的なサンプル</h2>
+<h3>１－２．C++からMASMの関数を呼び出す</h3>
+<h4>プロジェクトの作成</h4>
+　この内容は<b> Sample102</b>にあります。<br />
+　まず<b>VS2019</b>を起動し<b>新しいプロジェクトの作成</b>を選択します。
+<p>&nbsp;</p>
+<img src="img/01_02a.png" width="100%" border="1"/>
+<p>図0102a</p>
+<p>&nbsp;</p>
+　<b>コンソールアプリ</b>を選択して<b>次へ</b>をクリックします。
+<p>&nbsp;</p>
+<img src="img/01_02b.png" width="80%" border="1"/>
+<p>図0102b</p>
+<p>&nbsp;</p>
+　<b>プロジェクト名</b>を記入し<b>場所</b>を選択して<b>作成</b>をクリックします。
+<p>&nbsp;</p>
+<img src="img/01_02c.png" width="80%" border="1"/>
+<p>図0102c</p>
+<p>&nbsp;</p>
+　すると新しいソリューションが出来上がります。
+<h4>アセンブルコードの追加</h4>
+　<b>ソリューションエクスプローラ</b>から<b>ソースファイル</b>を右クリックして<b>追加－新しい項目</b>を指定します。
+<p>&nbsp;</p>
+<img src="img/01_02d.png" width="80%" border="1"/>
+<p>図0102d</p>
+<p>&nbsp;</p>
+　<b>Source.asm</b>の名前で追加します。
+<p>&nbsp;</p>
+<img src="img/01_02e.png" width="80%" border="1"/>
+<p>図0102e</p>
+<p>&nbsp;</p>
+　<b>Source.asm</b>を右クリックして、<b>プロパティ</b>を選択します。
+<p>&nbsp;</p>
+<img src="img/01_02f.png" width="80%" border="1"/>
+<p>図0102f</p>
+<p>&nbsp;</p>
+　<b>ビルドから除外</b>を<b>いいえ</b>にして<b>項目の種類</b>を<b>カスタムビルドツール</b>にして<b>適用</b>すると左に設定できる横目が出ます。
+<p>&nbsp;</p>
+<img src="img/01_02g.png" width="80%" border="1"/>
+<p>図0102g</p>
+<p>&nbsp;</p>
+　<b>コマンドライン</b>および<b>出力ファイル</b>を以下のように書き換えます。
+<div class="box1">
+<pre>
+コマンドライン:  ml /c /coff /Zi /Fo"$(OutDir)\%(Filename).obj" "%(Identity)"
+出力ファイル:  $(OutDir)\%(Filename).obj
+</pre>
+</div>
+<p>&nbsp;</p>
+<img src="img/01_02h.png" width="80%" border="1"/>
+<p>図0102h</p>
+<p>&nbsp;</p>
+　<b>Source.asm</b>に以下のようにコードを記述します。
+<div class="box1">
+<pre>
+
+.model flat, c
+
+.code
+
+;int func102(int a,int b)
+func102 proc a:DWORD,b:DWORD
+        mov eax,a
+        add eax,b
+        ret
+func102 endp
+end
+
+</pre>
+</div>
+<h4>C++ファイルの修正</h4>
+　<b>Sample102.cpp</b>を以下のように書き換えます。
+<div class="box1">
+<pre>
+#include &lt;iostream>
+
+extern "C" int func102(int, int);
+
+int main()
+{
+    std::cout &lt;&lt; func102(20,50) &lt;&lt; "\n";
+}
+</pre>
+</div>
+<h4>ビルドと実行</h4>
+　<b>ビルドーリビルド</b>します。<br />
+　<b>デバッグ－デバッグなしで実行</b>で、以下の画面が出てこれば成功です。
+<div class="box1">
+<pre>
+70
+
+...\Sample102\Debug\Sample102.exe (プロセス 7396) は、コード 0 を伴って終了しました。
+このウィンドウを閉じるには、任意のキーを押してください . . .
+</pre>
+</div>
+
+
+
+</div>
+<!-- /コンテンツ　-->
+<hr>
+<!-- フッタ　-->
+<ul class="foot_navi">
+<li><a href="01_01.html">前へ</a></li>
+<li><a href="index.html">目次</a></li>
+</ul>
+<!-- /フッタ　-->
+
+
+</div>
+<!-- /全体コンテナ　-->
+</body>
+</html>

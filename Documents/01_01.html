@@ -13,62 +13,65 @@
 </div>
 <!-- コンテンツ　-->
 <div id="contents">
-<h2>１．MASMからC言語の関数を呼び出す</h2>
-<h3>１－１．printfを呼び出す</h3>
+<h2>１．基本的なサンプル</h2>
+<h3>１－１．MASMからC言語の関数を呼び出す</h3>
 <h4>プロジェクトの作成</h4>
 　このドキュメントは、あらかじめVS2019環境に<b>C++デスクトップ環境</b>がセットアップされているとして解説します。<br />
+　最初にアセンブラのコードからC言語の関数を呼び出すプログラムを書いてみましょう。<br />
+　この内容は<b> Sample101</b>にあります。<br />
 　まず<b>VS2019</b>を起動し<b>新しいプロジェクトの作成</b>を選択します。
 <p>&nbsp;</p>
-<img src="img/01_01a.png" width="80%" border="1"/>
+<img src="img/01_01a.png" width="100%" border="1"/>
 <p>図0101a</p>
 <p>&nbsp;</p>
 　<b>Windowsデスクトップウェザード</b>を選択し<b>次へ</b>を選びます。
 <p>&nbsp;</p>
-<img src="img/01_01b.png" width="80%" border="1"/>
+<img src="img/01_01b.png" width="100%" border="1"/>
 <p>図0101b</p>
 <p>&nbsp;</p>
 　<b>プロジェクト名</b>を指定し（ここではSample101としています）、配置するディレクトリを指定し<b>作成</b>を選びます。
 <p>&nbsp;</p>
-<img src="img/01_01c.png" width="80%" border="1"/>
+<img src="img/01_01c.png" width="100%" border="1"/>
 <p>図0101c</p>
 <p>&nbsp;</p>
 　次の画面で<b>空のプロジェクト</b>にチェックをいれ、<b>OK</b>をクリックします。
 <p>&nbsp;</p>
-<img src="img/01_01d.png" width="60%" border="1"/>
+<img src="img/01_01d.png" width="80%" border="1"/>
 <p>図0101d</p>
 <p>&nbsp;</p>
 　プロジェクトが作成されますので<b>ソリューションエクスプローラ</b>から<b>プロジェクト名</b>を右クリックして<b></b>
 <b>ビルドの依存関係－ビルドのカスタマイズ</b>を選択します
 <p>&nbsp;</p>
-<img src="img/01_01e.png" width="60%" border="1"/>
+<img src="img/01_01e.png" width="80%" border="1"/>
 <p>図0101e</p>
 <p>&nbsp;</p>
-<img src="img/01_01f.png" width="60%" border="1"/>
+<img src="img/01_01f.png" width="80%" border="1"/>
 <p>図0101f</p>
 <p>&nbsp;</p>
 　<b>masm</b>を選択し<b>OK</b>します。
 <p>&nbsp;</p>
-<img src="img/01_01g.png" width="60%" border="1"/>
+<img src="img/01_01g.png" width="80%" border="1"/>
 <p>図0101g</p>
 <p>&nbsp;</p>
+<h4>アセンブルコードの追加</h4>
 　<b>ソースファイル－追加－新しい項目</b>を選びます。
 <p>&nbsp;</p>
-<img src="img/01_01h.png" width="60%" border="1"/>
+<img src="img/01_01h.png" width="80%" border="1"/>
 <p>図0101h</p>
 <p>&nbsp;</p>
 　<b>Source.asm</b>という名前でファイルを追加します。
 <p>&nbsp;</p>
-<img src="img/01_01i.png" width="60%" border="1"/>
+<img src="img/01_01i.png" width="80%" border="1"/>
 <p>図0101i</p>
 <p>&nbsp;</p>
 　<b>Source.asm</b>を右ボタンでクリックして<b>プロパティ</b>を開きます。
 <p>&nbsp;</p>
-<img src="img/01_01j.png" width="60%" border="1"/>
+<img src="img/01_01j.png" width="80%" border="1"/>
 <p>図0101j</p>
 <p>&nbsp;</p>
 　<b>ビルドから除外</b>を<b>いいえ</b>にして<b>カスタムビルドツール</b>を選択して<b>適用</b>をクリックすると、左側に設定できるようになります。
 <p>&nbsp;</p>
-<img src="img/01_01k.png" width="60%" border="1"/>
+<img src="img/01_01k.png" width="80%" border="1"/>
 <p>図0101k</p>
 <p>&nbsp;</p>
 　<b>コマンドライン</b>および<b>出力ファイル</b>を以下のように書き換えます。
@@ -79,7 +82,7 @@
 </pre>
 </div>
 <p>&nbsp;</p>
-<img src="img/01_01l.png" width="60%" border="1"/>
+<img src="img/01_01l.png" width="80%" border="1"/>
 <p>図0101l</p>
 <p>&nbsp;</p>
 　<b>Source.asm</b>に以下のようにコードを記述します。
@@ -110,6 +113,7 @@ end
 
 </pre>
 </div>
+<h4>ビルドと実行</h4>
 　<b>ビルドーリビルド</b>します。<br />
 　<b>デバッグ－デバッグなしで実行</b>で、以下の画面が出てこれば成功です。
 <div class="box1">
@@ -120,6 +124,7 @@ Hello World!
 このウィンドウを閉じるには、任意のキーを押してください . . .
 </pre>
 </div>
+
 </div>
 <!-- /コンテンツ　-->
 <hr>
