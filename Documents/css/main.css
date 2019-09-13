@@ -277,6 +277,10 @@ ul.foot_navi li {
 }
 
 
+#contents .right{
+	text-align: right;
+}
+
 #contents input,textarea{
 	font-size: 90%;
 }
