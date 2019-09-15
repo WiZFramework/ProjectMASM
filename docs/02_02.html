@@ -1,0 +1,106 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<link href="css/main.css" rel="stylesheet" type="text/css">
+<title>ProjectMASM</title>
+</head>
+<body>
+<!-- 全体コンテナ　-->
+<div id="container">
+<div id="header">
+<h3>ProjectMASM</h3>
+</div>
+<!-- コンテンツ　-->
+<div id="contents">
+<h2>２．SSE2命令の実装</h2>
+<h3>２－２．構造体をアセンブリに渡す（64ビット版）</h3>
+　今回は<b>構造体</b>をアセンブリコードに渡してみて、問題なく計算できるかを確認します。<br />
+　ソリューションエクスプローラの<b>ソースファイル</b>にある<b>Source.asm</b>がアセンブラのコードです。<br />
+　以下に内容を紹介します。
+<div class="box1">
+<pre>
+.code
+
+;float funcSample(Vector* v)
+funcSample  proc
+    movss   xmm0,   dword ptr [rcx]
+    addss   xmm0,   dword ptr [rcx+4]
+    addss   xmm0,   dword ptr [rcx+8]
+    addss   xmm0,   dword ptr [rcx+12]
+    ret 
+funcSample  endp
+        end
+</pre>
+</div>
+　この関数は浮動小数点で形成された<b>構造体のポインタ</b>を受け取ってその要素をすべて加算し返す関数です。<br />
+　単純な内容ですが<b>構造体の受け渡し</b>のテストになります。<br />
+　以下がC/C++側です。
+<div class="box1">
+<pre>
+#include &lt;iostream>
+
+struct Vector {
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
+
+extern "C" float funcSample(Vector* v);
+
+int main()
+{
+    Vector v = { 1.5f,2.3f,3.4f,4.5f };
+
+    std::cout &lt;&lt; funcSample(&v) &lt;&lt; "\n";
+}
+</pre>
+</div>
+　リビルドして実行すると
+<div class="box1">
+<pre>
+11.7
+
+...\ProjectMASM\Sample202\x64\Debug\SampleMASM.exe (プロセス 15952) は、コード 0 を伴って終了しました。
+このウィンドウを閉じるには、任意のキーを押してください . . .
+</pre>
+</div>
+　と表示されます。<br />
+<h4>コード解説</h4>
+　アセンブリ側ではまず
+<div class="box1">
+<pre>
+    movss   xmm0,   dword ptr [rcx]
+</pre>
+</div>
+　という記述があります。<br />
+　ポインタの場合、最初の引数は<b>rcxレジスタ</b>に入りますので、そのポインタの指す場所の値をxmm0に代入します。<br />
+　この構造体はfloat型のメンバですのでサイズは4バイトです、ですので次の要素の場所は<b>[rcx+4]</b>になります。
+<div class="box1">
+<pre>
+    addss   xmm0,   dword ptr [rcx+4]
+</pre>
+</div>
+　同様、4バイト先を読んでいって、xmm0に加算します。<br />
+　戻り値は浮動小数点ですので<b>xmm0の内容</b>がC/C++側にもどされますので、そのままretします。
+<h4>次のテーマは？</h4>
+　さて、1章からここまで、<b>C/C++とアセンブリの相互呼び出し</b>をやってきました。<br />
+　しかしテキストベースでは、なかなか効果がわかりません。ですので次章からはガラッと趣を変え<b>アセンブリコードをゲームに埋め込む</b>ということをやってみたいと思います。
+</div>
+<!-- /コンテンツ　-->
+<hr>
+<!-- フッタ　-->
+<ul class="foot_navi">
+<li><a href="02_01.html">前へ</a></li>
+<li><a href="index.html">目次</a></li>
+<li><a href="03_01.html">次へ</a></li>
+</ul>
+<!-- /フッタ　-->
+
+
+</div>
+<!-- /全体コンテナ　-->
+</body>
+</html>
