@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<link href="css/main.css" rel="stylesheet" type="text/css">
+<title>ProjectMASM</title>
+</head>
+<body>
+<!-- 全体コンテナ　-->
+<div id="container">
+<div id="header">
+<h3>ProjectMASM</h3>
+</div>
+<!-- コンテンツ　-->
+<div id="contents">
+<h2>３．BaseCross64への実装</h2>
+<h3>３－１．衝突判定をアセンブラで実装してみた</h3>
+　前項までは<b>コンソールアプリケーション</b>で<b>C/C++からアセンブリを呼び出す</b>という形でした。<br />
+　しかし、そのままある程度複雑なものを書いても、表現する手段がテキストだけだと限られてきます。<br />
+　ですので<b>BaseCross64</b>というゲームフレームワーク、レポジトリは<a href="https://github.com/WiZFramework/BaseCross64" target="_blank">こちら</a>に実装してみて、<b>アセンブラで直接記述の効果</b>を検証してみたいと思います。<br />
+　<b>BaseCross64</b>側に実装するのは時期相生と思われますので、まずはこちらのレポジトリで検証したいと思います。<br />
+　まず第一弾として<b>衝突判定</b>を実装してみました。<br />
+　ゲームになくてはならない機能として<b>衝突判定</b>があるわけですが、<b>BaseCross64</b>ではそれをC/C++で実装しています。<br />
+　とはいえ最終的な演算は<b>XNAMath</b>というマイクロソフト社の計算エンジンにたどり着くので、そこで<b>SSE2命令</b>が発行されるわけですが、そこに至るまでに結構な量のC/C++ソースをたどったり、あるいは多数の関数呼び出しがあるので、必ずしも効率的とは言えません。<br />
+　そこで、試しに<b>衝突判定</b>をアセンブリで書いたらどのくらいスピードアップするのかを試してみたいと思います。<br />
+　実験するのは<b>球対球</b>の判定です。<b>BaseCross64</b>にはほかに<b>ボックス、カプセル</b>などがあり、それぞれに多対多で判定するわけですが、それをアセンブリで実装するのは、ちと荷が重いので、今回は<b>球対球</b>だけにします。<br />
+　とはいえ、<b>単純こそ強力</b>なもので、これを応用すると結構な効果を出せると思います。
+<h4>一つの球同士の判定</h4>
+　まずは、この項では<b>1対1</b>の判定を行います。<b>1対多</b>あるいは<b>多対多</b>は次項以降で行います。<br />
+　<b>Sample301</b>ディレクトリ内に<b>BaseCrossDx11VS2017.sln</b>と<b>BaseCrossDx11VS2019.sln</b>があります。<b>VS2017</b>の場合は前者を<b>VS2019</b>の場合は後者を開いてください。このサンプルは<b>VS2017、2019両方</b>に対応しています。
+<h4>設定から実装する場合</h4>
+　すでに<b>BaseCross64</b>を使っていて、0から設定してみたい人のために、設定の仕方を述べます。
+<h4>セットアップ</h4>
+　<b>VS2019</b>を例にとり説明します。<br >
+　まず、ダウンロードした<b>BaseCross64</b>の中の雛形になりそうなサンプルを<b>ディレクトリごとにコピペ</b>して新しいサンプルディレクトリを作成します。そして好きな名前を付けます。ここでは<b>SampleMASM</b>とします。<br />
+　その中の<b>BaseCrossDx11VS2019.sln</b>を<b>VS2019</b>で開きます。<br />
+　開いたら<b>ソリューションエクスプローラ</b>から<b>BaseCrossDx11VS2019プロジェクト</b>を右クリックし、<b>ビルドの依存関係－ビルドのカスタマイズ</b>を選びます。<br />
+<p>&nbsp;</p>
+<img src="img/03_01a.png" width="80%" border="1"/>
+<p>図0301a</p>
+<p>&nbsp;</p>
+　でてきたダイアログで<b>masm</b>をチェックして<b>OK</b>します。
+<p>&nbsp;</p>
+<img src="img/03_01b.png" width="80%" border="1"/>
+<p>図0301b</p>
+<p>&nbsp;</p>
+　続いて、もう一度<b>BaseCrossDx11VS2019プロジェクトの中のソースファイル</b>を右クリックし、<b>追加－新しい項目</b>を選択します。
+<p>&nbsp;</p>
+<img src="img/03_01c.png" width="80%" border="1"/>
+<p>図0301c</p>
+<p>&nbsp;</p>
+　出てきた画面で<b>CollisionSphere.asm</b>を作成します。
+<p>&nbsp;</p>
+<img src="img/03_01d.png" width="80%" border="1"/>
+<p>図0301d</p>
+<p>&nbsp;</p>
+　ここで注意したいのは<b>アセンブリコード</b>は必ず<b>BaseCrossDx11VS2019プロジェクトの中のソースファイル</b>に配置してください。他の参照プロジェクトに配置するとうまくいかない場合があります。<br />
+　<b>CollisionSphere.asm</b>を右クリックし<b>プロパティ</b>を開きます。出てきた画面で、以下のようになるように設定します。
+<p>&nbsp;</p>
+<img src="img/03_01e.png" width="80%" border="1"/>
+<p>図0301e</p>
+<p>&nbsp;</p>
+　<b>CollisionSphere.asm</b>を開き、以下のソースを記述します
+<div class="box1">
+<pre>
+
+.data
+
+.code
+
+;int CollisionSp(SPHERE* sp1, SPHERE* sp2)
+;dword ptr [rcx]        sp1.m_Center.x
+;dword ptr [rcx+4]      sp1.m_Center.y
+;dword ptr [rcx+8]      sp1.m_Center.z
+;dword ptr [rcx+12]     sp1.m_Radius
+;dword ptr [rdx]        sp2.m_Center.x
+;dword ptr [rdx+4]      sp2.m_Center.y
+;dword ptr [rdx+8]      sp2.m_Center.z
+;dword ptr [rdx+12]     sp2.m_Radius
+CollisionSp proc
+    ;m_Center同士の引き算
+    movss   xmm4,   dword ptr [rcx]     ;sp1.m_Center.x
+    subss   xmm4,   dword ptr [rdx]     ;sp2.m_Center.x
+    mulss   xmm4,   xmm4                    ;x * x
+    movss   xmm5,   dword ptr [rcx+4]       ;sp1.m_Center.y
+    subss   xmm5,   dword ptr [rdx+4]       ;sp2.m_Center.y
+    mulss   xmm5,   xmm5                    ;y * y
+    movss   xmm6,   dword ptr [rcx+8]       ;sp1.m_Center.z
+    subss   xmm6,   dword ptr [rdx+8]       ;sp2.m_Center.z
+    mulss   xmm6,   xmm6                    ;z * z
+    ;dot演算
+    addss   xmm4,   xmm5                    
+    addss   xmm4,   xmm6                    ; xmm4 == dot
+    ;半径同士の加算
+    movss   xmm1,   dword ptr [rcx+12]      ;sp1.m_Radius
+    addss   xmm1,   dword ptr [rdx+12]      ;sp2.m_Radius
+    ;加算結果の2乗
+    mulss   xmm1,   xmm1                    
+    ;半径加算2乗がdot演算結果より大きければ衝突
+    comiss  xmm4,   xmm1
+    JBE     truelabel
+    mov     eax,    0
+    ret 
+truelabel:
+    mov     eax,    1
+    ret 
+CollisionSp endp
+        end
+</pre>
+</div>
+　記述したら<b>ビルド－リビルド</b>をします。無事ビルド出来れば成功です。これで、ゲームのソース中どこからでも<b>球体球</b>の衝突判定を呼ぶことができます。<br />
+　関数を呼ぶ際は、呼ぶ場所から見えるところで
+<div class="box1">
+<pre>
+    extern "C" int CollisionSp(SPHERE* sp1, SPHERE* sp2);
+</pre>
+</div>
+　という<b>関数宣言</b>を行ってください。
+<h4>Sample301の解説</h4>
+　さて、実装方法を説明したところで、<b>Sample301</b>の説明を行います。<br />
+　<b>Sample301</b>ディレクトリ内の<b>BaseCrossDx11VS2017.sln（VS2017の場合）</b>か<b>BaseCrossDx11VS2019.sln（VS2019の場合）</b>を開いてみましょう。<br />
+　リビルドして実行すると以下の画面が出てきます。
+<p>&nbsp;</p>
+<img src="img/03_01f.png" width="80%" border="1"/>
+<p>図0301f</p>
+<p>&nbsp;</p>
+　ここでコントローラでプレイヤーを動かし<b>Aボタン</b>でジャンプさせて、正面の球に当たると、球が消滅します。<b>Xボタンで復帰</b>します。<br />
+　この判定は上記のアセンブリコードを使っています。<br />
+　呼び出しているのは<b>Character.cpp</b>内の<b>HitTestSphere::OnUpdate()</b>です。<br />
+　付近のコードは以下です。
+<div class="box1">
+<pre>
+    extern "C" int CollisionSp(SPHERE* sp1, SPHERE* sp2);
+
+    //操作
+    void HitTestSphere::OnUpdate() {
+
+        SPHERE sp1;
+        sp1.m_Center = m_Position;
+        sp1.m_Radius = m_Scale / 2;
+
+        auto ptrPlayer = GetStage()->GetSharedGameObject&lt;Player>(L"Player");
+        auto sp2 = ptrPlayer->GetComponent&lt;CollisionSphere>()->GetSphere();
+        if (<span class="red">CollisionSp(&sp1, &sp2)</span>) {
+            SetUpdateActive(false);
+            SetDrawActive(false);
+            auto ptrShadow = AddComponent&lt;Shadowmap>();
+            ptrShadow->SetDrawActive(false);
+        }
+
+    }
+
+</pre>
+</div>
+　冒頭に
+<div class="box1">
+<pre>
+    extern "C" int CollisionSp(SPHERE* sp1, SPHERE* sp2);
+</pre>
+</div>
+　という記述があります。これがないと呼び出せません。<br />
+　赤くなっているとことが、アセンブリ関数を呼び出しているところです。衝突すると、消えるように記述しています。<br />
+<br />
+　次項では、1対1ではなく、<b>1対多</b>の挑戦してみます。
+</div>
+<!-- /コンテンツ　-->
+<hr>
+<!-- フッタ　-->
+<ul class="foot_navi">
+<li><a href="02_02.html">前へ</a></li>
+<li><a href="index.html">目次</a></li>
+<li><a href="03_02.html">次へ</a></li>
+</ul>
+<!-- /フッタ　-->
+
+
+</div>
+<!-- /全体コンテナ　-->
+</body>
+</html>
