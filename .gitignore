@@ -5,6 +5,8 @@
 /Libs/lib/
 /**/Temp/
 /**/media/Shaders/
+/**/bin/
+/**/out/
 
 # User-specific files
 *.suo
